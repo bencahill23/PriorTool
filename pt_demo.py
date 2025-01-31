@@ -2,43 +2,9 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 
-
-
-
-#############
-# IMPORT DATA
-#############
-
-importedData = pd.read_excel('assets/PriorTool_Input_Data.xlsx')
-numQuestions = importedData.shape[0]
-
-# get the activity types list
-allTypes = []
-for i in range(numQuestions):
-	allTypes.append(importedData.iloc[i]['ACTIVITY_TYPE'])
-actTypes = list(set(allTypes))
-actTypes.reverse()
-
-
-##print the column names
-#print (importedData.columns)
-print ("Number of Questions: " + str(numQuestions))
-print (importedData.iloc[0]['ACTIVITY_TYPE'])
-print (importedData.iloc[0]['QUESTION'])
-print (importedData.iloc[0]['QUESTION_TYPE'])
-print (importedData.iloc[0]['WEIGHT'])
-#print (importedData.iloc[1])
-
-
-#get the values for a given column
-#values = importedData['column_name'].values
-#print(values)
-#get a data frame with selected columns
-#FORMAT = ['Col_1', 'Col_2', 'Col_3']
-#df_selected = importedData[FORMAT]
-
 #Global Variables
-#actTypes = ['Conference','Network Meeting', 'Innovation Project']
+#
+actTypes = ['Conference','Network Meeting', 'Innovation Project']
 actType = ''
 economy = 0
 V4WBDKScore = 0
