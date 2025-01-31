@@ -7,8 +7,43 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 
+
+
+
+#############
+# IMPORT DATA
+#############
+
+importedData = pd.read_excel('assets/PriorTool_Input_Data.xlsx')
+numQuestions = importedData.shape[0]
+
+# get the activity types list
+allTypes = []
+for i in range(numQuestions):
+	allTypes.append(importedData.iloc[i]['ACTIVITY_TYPE'])
+actTypes = list(set(allTypes))
+actTypes.reverse()
+
+
+##print the column names
+#print (importedData.columns)
+print ("Number of Questions: " + str(numQuestions))
+print (importedData.iloc[0]['ACTIVITY_TYPE'])
+print (importedData.iloc[0]['QUESTION'])
+print (importedData.iloc[0]['QUESTION_TYPE'])
+print (importedData.iloc[0]['WEIGHT'])
+#print (importedData.iloc[1])
+
+
+#get the values for a given column
+#values = importedData['column_name'].values
+#print(values)
+#get a data frame with selected columns
+#FORMAT = ['Col_1', 'Col_2', 'Col_3']
+#df_selected = importedData[FORMAT]
+
 #Global Variables
-actTypes = ['Conference','Network Meeting', 'Innovation Project']
+#actTypes = ['Conference','Network Meeting', 'Innovation Project']
 actType = ''
 economy = 0
 V4WBDKScore = 0
@@ -16,19 +51,35 @@ numLeads = 0
 V4WBDKSummary = []
 V4MemberSummary = []
 V4SocSummary = []
+actTitle = ''
+author = ''
 
 
-st.title('WBDK Prioritising Tool v.1.0')
-actType = st.radio('Activity Type', actTypes)
 
-# TITLE TEXT
+# Title/Header
+cola, colb = st.columns([4,1])
+with cola:
+	st.title('WBDK Prioritising Tool v.1.0')
+with colb:
+	st.image('assets/logo.jpg')
 
-actTitle = st.text_input('Activity Title', 'Descriptive Title')
+###################
+# Activity Section
+###################
+actContainer = st.container(border = True)
+#actContainer.header('Activity')
+with actContainer.container():
+	cola, colb = st.columns(2)
+	with cola:
+		actType = st.radio('Activity Type', actTypes)
+	with colb:
+		actTitle = st.text_input('Activity Title', 'Activity Title', label_visibility="collapsed")
+		author = st.text_input('Activity Title', 'Author', label_visibility="collapsed")
 
 
-#
-# ECONOMY SECTION - Should be visible for all types
-#
+#################
+# ECONOMY SECTION 
+#################
 ecoHelpText = ''' 
 Examples of (equivalent) positive income streams:  
 Ticket Price  
@@ -50,9 +101,9 @@ with ecoContainer.container():
 	ecoSubContainer = st.container(border = True)
 	col1, col2, = st.columns(2)
 	with col1:
-		economy_in = st.number_input('Economy gain for activity (DKK)')
+		economy_in = st.number_input('Economy gain for activity (DKK)', step = 1)
 	with col2:
-		economy_out = st.number_input('Economy loss for activity (DKK)')
+		economy_out = st.number_input('Economy loss for activity (DKK)', step = 1)
 
 economy = economy_in - economy_out
 ecoContainer.write('Total Economy: ' + str(economy) + ' DKK')
