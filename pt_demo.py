@@ -239,10 +239,7 @@ for (i,a) in enumerate(V4SocSummary):
 	V4S.append(a)
 
 # V4W contains a list of the results from the Vlaue for WBDK Section
-V4SocScore  = np.average(V4S) #(speakerScore + standScore + cosenderScore) /3
-#Display scoring
-
-#V4WBDKContainer.write('Total Score for Value for WBDK: ' + str(V4WBDKScore))
+V4SocScore  = np.average(V4S) 
 
 #
 # END Value for SOCIETY Section
