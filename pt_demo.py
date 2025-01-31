@@ -18,15 +18,12 @@ V4MemberSummary = []
 V4SocSummary = []
 
 
-
 st.title('WBDK Prioritising Tool v.1.0')
 actType = st.radio('Activity Type', actTypes)
 
 # TITLE TEXT
 
 actTitle = st.text_input('Activity Title', 'Descriptive Title')
-
-
 
 
 #
