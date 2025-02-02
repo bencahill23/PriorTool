@@ -77,8 +77,7 @@ with colb:
 ###################
 # Activity Section
 ###################
-actContainer = st.container(border = True)
- 
+actContainer = st.container(border = True) 
 with actContainer.container():
 	cola, colb = st.columns(2)
 	with cola:
