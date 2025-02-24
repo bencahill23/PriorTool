@@ -2,7 +2,8 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import random
-
+import os
+from tempfile import NamedTemporaryFile
 
 
 
@@ -10,8 +11,8 @@ import random
 # IMPORT DATA
 #############
 @st.cache_data
-def readExcel():
-	importedData = pd.read_excel('assets/PriorTool_Input_Data.xlsx')
+def readExcel(pathToFile):
+	importedData = pd.read_excel(pathToFile)
 	keys = []
 	for i in range(importedData.shape[0]):
 		keys.append(str(random.randint(1,100000)))
@@ -27,10 +28,10 @@ def categoryWidget(_category, _activity, _data, _keys):
 	for i in range(data.shape[0]):
 		at = data.iloc[i]['ACTIVITY_TYPE']
 		cat = data.iloc[i]['CATEGORY']
-		#print(cat)
+
 		if (at == activity) and (cat == category):
 			temp = [data.iloc[i]['QUESTION'],data.iloc[i]['QUESTION_TYPE'],data.iloc[i]['WEIGHT'], data.iloc[i]['CATEGORY'],keys[i]]
-			questions.append(temp)
+			questions.append(temp.copy())
 
 	catResult = [None] *len(questions)# holder for data
 	testCont = st.container(border=True)
@@ -41,15 +42,45 @@ def categoryWidget(_category, _activity, _data, _keys):
 		for (i,q) in enumerate(questions):
 			if q[1] == 'binary':
 				catResult[i] = st.radio(q[0],['YES', 'NO'], horizontal=True, key = q[4])
+				if catResult[i] == 'YES':
+					catResult[i] = 1
+				else:
+					catResult[i] = 0
 			elif q[1] == 'numeric':
 				catResult[i] = st.number_input(q[0], step = 1, key = q[4])
 
 		st.expander('Help for Value for ' + category).write("HELP TEXT TODO")
-	return (questions, catResult)
+	return (questions.copy(), catResult.copy())
 
 
 
-data = readExcel()
+
+###################
+# Header
+###################
+cola, colb = st.columns([4,1])
+with cola:
+	st.title('WBDK Prioritising Tool v.1.0')
+with colb:
+	st.image('assets/logo.jpg')
+
+
+###################
+# Import File Section
+###################
+impFileContainer = st.container(border = True) 
+with impFileContainer.container():
+	uploaded_file = st.file_uploader("Choose a file")
+	if uploaded_file is not None:
+		with NamedTemporaryFile(dir='.') as f:
+			f.write(uploaded_file.getbuffer())
+			data = readExcel(f.name)
+	else:
+		data = readExcel('assets/PriorTool_Input_Data.xlsx') # default Excel file
+
+
+
+
 importedData = data[0]
 keys = data[1]
 numQuestions = importedData.shape[0]
@@ -65,14 +96,7 @@ actTypes = list(set(allTypes)) # list of uniques ACTIVITY TYPES
 catTypes = list(set(allCats)) # list of uniques CATEGORIES
 
 
-###################
-# Header
-###################
-cola, colb = st.columns([4,1])
-with cola:
-	st.title('WBDK Prioritising Tool v.1.0')
-with colb:
-	st.image('assets/logo.jpg')
+
 
 ###################
 # Activity Section
@@ -126,10 +150,51 @@ ecoContainer.write('Total Economy: ' + str(economy) + ' DKK')
 ###################
 # Build GUI 
 ###################
+responses = []
 for cat in catTypes:
-	categoryWidget(cat, actType, importedData, keys)
+	#categoryWidget(cat, actType, importedData, keys)
+	responses.append(categoryWidget(cat, actType, importedData, keys))
 
 
+if st.button('SUBMIT REPONSE'):
+	st.write("You saved your data")
+	st.write(responses)
+
+###################
+# Summarise Responses
+###################
+
+
+categoryResponses = []
+collectedResponses = []
+weights =[]
+
+print('-'*50)
+for resp in responses:
+	print('Questions -')
+	print(resp[0])
+	for questions in resp[0]:
+		weights.append(questions[2])
+
+	catWeights = weights.copy()
+	weights = []
+
+
+	collectedResponses.append([resp[1], catWeights])
+
+	print('CAT RESPONSE')
+	print(resp[1]) # answers set
+	print(catWeights)
+	print('*'*20) # answers
+
+
+print('-'*50)
+#print(responses[1][0][0])
+#print(responses[0][0][0]) # question params for [category][questions = 1, reponses = 0][question number]
+#print(responses[0][0][0][2]) # weight for a given question
+#print(responses[0][1]) # reponses from section 0
+
+#print(responses[1][1])
 
 #
 # Summary
