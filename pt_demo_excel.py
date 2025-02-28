@@ -41,13 +41,16 @@ def categoryWidget(_category, _activity, _data, _keys):
 		st.header(headertext)
 		for (i,q) in enumerate(questions):
 			if q[1] == 'binary':
-				catResult[i] = st.radio(q[0],['YES', 'NO'], horizontal=True, key = q[4])
-				if catResult[i] == 'YES':
-					catResult[i] = 1
+				cr = st.radio(q[0],['YES', 'NO'], horizontal=True)#, key = q[4])
+				if cr == 'YES':
+					cr = 1
 				else:
-					catResult[i] = 0
+					cr = 0
+
 			elif q[1] == 'numeric':
-				catResult[i] = st.number_input(q[0], step = 1, key = q[4])
+				cr = st.number_input(q[0], step = 1)#, key = q[4]) # WHY DID I WRITE THIS key= ???
+
+			catResult[i] = cr
 
 		st.expander('Help for Value for ' + category).write("HELP TEXT TODO")
 	return (questions.copy(), catResult.copy())
