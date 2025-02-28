@@ -170,28 +170,37 @@ if st.button('SUBMIT REPONSE'):
 
 categoryResponses = []
 collectedResponses = []
+collectedWeights = []
+collectedQuestions = []
+weightedResult = []
 weights =[]
 
 print('-'*50)
 for resp in responses:
-	print('Questions -')
-	print(resp[0])
 	for questions in resp[0]:
+		collectedQuestions.append(questions[0])
 		weights.append(questions[2])
 
 	catWeights = weights.copy()
 	weights = []
+	collectedResponses.append(resp[1])#, catWeights])
+	collectedWeights.append(catWeights.copy())
 
-
-	collectedResponses.append([resp[1], catWeights])
-
-	print('CAT RESPONSE')
-	print(resp[1]) # answers set
-	print(catWeights)
-	print('*'*20) # answers
 
 
 print('-'*50)
+
+for i,response in enumerate(collectedResponses):
+	for j in range(len(response)):
+		weightedResult.append(collectedResponses[i][j] * collectedWeights[i][j])
+
+print(collectedQuestions)
+print(weightedResult)
+
+for i,q in enumerate(collectedQuestions):
+	print(q + " - " + str(weightedResult[i]))
+print('-'*50)
+
 #print(responses[1][0][0])
 #print(responses[0][0][0]) # question params for [category][questions = 1, reponses = 0][question number]
 #print(responses[0][0][0][2]) # weight for a given question
