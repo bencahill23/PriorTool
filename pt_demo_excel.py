@@ -186,16 +186,10 @@ for resp in responses:
 	collectedResponses.append(resp[1])#, catWeights])
 	collectedWeights.append(catWeights.copy())
 
-
-
-print('-'*50)
-
 for i,response in enumerate(collectedResponses):
 	for j in range(len(response)):
 		weightedResult.append(collectedResponses[i][j] * collectedWeights[i][j])
 
-print(collectedQuestions)
-print(weightedResult)
 
 for i,q in enumerate(collectedQuestions):
 	print(q + " - " + str(weightedResult[i]))
