@@ -63,7 +63,7 @@ def categoryWidget(_category, _activity, _data, _keys):
 ###################
 cola, colb = st.columns([4,1])
 with cola:
-	st.title('WBDK Prioritising Tool v.1.0')
+	st.title('WBDK Prioritising Tool v.1.1')
 with colb:
 	st.image('assets/logo.jpg')
 
@@ -81,9 +81,6 @@ with impFileContainer.container():
 	else:
 		data = readExcel('assets/PriorTool_Input_Data.xlsx') # default Excel file
 
-
-
-
 importedData = data[0]
 keys = data[1]
 numQuestions = importedData.shape[0]
@@ -97,8 +94,6 @@ for i in range(numQuestions):
 
 actTypes = list(set(allTypes)) # list of uniques ACTIVITY TYPES
 catTypes = list(set(allCats)) # list of uniques CATEGORIES
-
-
 
 
 ###################
@@ -119,17 +114,14 @@ with actContainer.container():
 #################
 ecoHelpText = ''' 
 Examples of (equivalent) positive income streams:  
-Ticket Price  
-Stand Rental   
+Ticket Price   
+Stand Rental 
 
-A List of Stuff:  
-1. THING  
-2. THING  
-3. OTHER THING  
-  
-
-REmember ABC  
+Examples of (equivalent) negative income streams:  
+Travel costs  
+Hours  
 '''
+cost_per_lead = 0
 ecoContainer = st.container(border = True)
 ecoContainer.header('Economy - ' + ' '+ actType)
 with ecoContainer.container():
@@ -137,31 +129,32 @@ with ecoContainer.container():
 
 	ecoSubContainer = st.container(border = True)
 	col1, col2, = st.columns(2)
+
 	with col1:
 		economy_in = st.number_input('Economy gain for activity (DKK)', step = 1)
 	with col2:
 		economy_out = st.number_input('Economy loss for activity (DKK)', step = 1)
+	economy = economy_in - economy_out
 
-economy = economy_in - economy_out
+	if actType == 'Conference':
+		num_leads = st.number_input('Leads Expected', step = 1)
+		if (num_leads):
+			cost_per_lead = int(economy/num_leads)
+
+
 ecoContainer.write('Total Economy: ' + str(economy) + ' DKK')
+ecoContainer.write('Cost Per Lead: ' + str(cost_per_lead) + ' DKK' )
 
 ###################
 #END ECONOMY SECTION
 ###################
-
 
 ###################
 # Build GUI 
 ###################
 responses = []
 for cat in catTypes:
-	#categoryWidget(cat, actType, importedData, keys)
 	responses.append(categoryWidget(cat, actType, importedData, keys))
-
-
-if st.button('SUBMIT REPONSE'):
-	st.write("You saved your data")
-	st.write(responses)
 
 ###################
 # Summarise Responses
@@ -175,7 +168,7 @@ collectedQuestions = []
 weightedResult = []
 weights =[]
 
-print('-'*50)
+
 for resp in responses:
 	for questions in resp[0]:
 		collectedQuestions.append(questions[0])
@@ -190,32 +183,40 @@ for i,response in enumerate(collectedResponses):
 	for j in range(len(response)):
 		weightedResult.append(collectedResponses[i][j] * collectedWeights[i][j])
 
+flat_weighs_list = [
+    x
+    for xs in collectedWeights
+    for x in xs
+]
 
-for i,q in enumerate(collectedQuestions):
-	print(q + " - " + str(weightedResult[i]))
-print('-'*50)
+overall_result = np.mean(weightedResult) / np.mean(flat_weighs_list)
 
-#print(responses[1][0][0])
-#print(responses[0][0][0]) # question params for [category][questions = 1, reponses = 0][question number]
-#print(responses[0][0][0][2]) # weight for a given question
-#print(responses[0][1]) # reponses from section 0
+###################
+# Generate Responses
+###################
 
-#print(responses[1][1])
+category_reponses = []
+for r in responses:
+	resps =  r[1]
+	cat_title = r[0][0][3]
+	tmp_wght = []
+	for cat in r[0]:
+		tmp_wght.append(cat[2])
 
-#
-# Summary
-#
-# totalScores = [V4WBDKScore, V4MemberScore,V4SocScore]
-# totalAverage = np.mean(totalScores)
-# summaryContainer = st.container(border = True)
+	categoryResponses.append([cat_title, resps, tmp_wght.copy()])
 
-# with summaryContainer.container():
-# 	st.header('Summary for ' + actTitle +' - ' + actType)
-# 	st.write('Cost-per-lead: ' + str(costPerLead) + ' DKK')
-# 	st.write('Value for WBDK: ' + str(V4WBDKScore))
-# 	st.write('Value for Member: ' + str(V4MemberScore))
-# 	st.write('Value for Society: ' + str(V4SocScore))
-# 	st.write('-'*20)
-# 	st.write('Total Score: ' + str(totalAverage))
-# 	#V4SocScore
 
+if st.button('SUBMIT REPONSE'):
+	st.header('Overall Scores')
+	st.write('Total Economy: ' + str(economy) + ' DKK')
+	if cost_per_lead:
+		st.write('Cost Per Lead: ' + str(cost_per_lead) + ' DKK')
+	st.write('Overall Score: ' + str(int(overall_result*100)) + '%')
+	st.header('Category Scores')
+	for cat in categoryResponses:
+		scr = (cat[1])
+		wt = (cat[2])
+		weighted = np.multiply(scr, wt)
+
+
+		st.write(str(cat[0]) + ' Score: ' + str(int((np.mean(weighted)/np.mean(wt))*100)) + '%')
