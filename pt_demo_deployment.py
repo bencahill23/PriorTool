@@ -73,7 +73,7 @@ with colb:
 ###################
 impFileContainer = st.container(border = True) 
 with impFileContainer.container():
-	uploaded_file = st.file_uploader("Choose a file")
+	uploaded_file = None
 	if uploaded_file is not None:
 		with NamedTemporaryFile(dir='.') as f:
 			f.write(uploaded_file.getbuffer())
@@ -206,28 +206,17 @@ for r in responses:
 	categoryResponses.append([cat_title, resps, tmp_wght.copy()])
 
 
+if st.button('SUBMIT REPONSE'):
+	st.header('Overall Scores')
+	st.write('Total Economy: ' + str(economy) + ' DKK')
+	if cost_per_lead:
+		st.write('Cost Per Lead: ' + str(cost_per_lead) + ' DKK')
+	st.write('Overall Score: ' + str(int(overall_result*100)) + '%')
+	st.header('Category Scores')
+	for cat in categoryResponses:
+		scr = (cat[1])
+		wt = (cat[2])
+		weighted = np.multiply(scr, wt)
 
-st.header('Overall Score: ' + str(int(overall_result*100)) + '%')
-#st.write('Total Economy: ' + str(economy) + ' DKK')
-# if cost_per_lead:
-# 	st.write('Cost Per Lead: ' + str(cost_per_lead) + ' DKK')
-# st.write('Overall Score: ' + str(int(overall_result*100)) + '%')
-#st.header('Category Scores')
-final_score = []
-for cat in categoryResponses:
-	scr = (cat[1])
-	wt = (cat[2])
-	weighted = np.multiply(scr, wt)
-	final_score.append(int((np.mean(weighted)/np.mean(wt))*100))
 
-	#st.write(str(cat[0]) + ' Score: ' + str(int((np.mean(weighted)/np.mean(wt))*100)) + '%')
-df = pd.DataFrame(
-        {
-            "Category": list(zip(*categoryResponses))[0],
-            "Score": final_score,
-        }
-    )
-
-st.dataframe(df, use_container_width=True,hide_index=True)
-st.bar_chart(df, x="Category", y="Score", color=["#FF0000"])
-
+		st.write(str(cat[0]) + ' Score: ' + str(int((np.mean(weighted)/np.mean(wt))*100)) + '%')
