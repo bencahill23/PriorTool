@@ -4,6 +4,7 @@ import numpy as np
 import random
 import os
 from tempfile import NamedTemporaryFile
+import plotly.express as px
 
 
 
@@ -230,4 +231,7 @@ df = pd.DataFrame(
 
 st.dataframe(df, use_container_width=True,hide_index=True)
 st.bar_chart(df, x="Category", y="Score", color=["#FF0000"])
+fig = px.line_polar(df, r='Score', theta='Category', line_close=True)
+st.plotly_chart(fig)
+#st.write(fig.show())
 
