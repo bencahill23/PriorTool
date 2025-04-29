@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -5,8 +6,24 @@ import random
 import os
 from tempfile import NamedTemporaryFile
 import plotly.express as px
+import google.generativeai as ai
+from pypdf import PdfReader
 
 
+#############
+# CHATBOT
+#############
+
+google_api_key = 'AIzaSyBC6tI_A5paMPTTAJt9OU1V25Ussf9iCeo'
+# Configure the API
+ai.configure(api_key=google_api_key)
+
+# Create a new model
+model = ai.GenerativeModel("gemini-1.5-pro-002")
+chat = model.start_chat()
+global message
+
+#############
 
 #############
 # IMPORT DATA
@@ -18,6 +35,9 @@ def readExcel(pathToFile):
 	for i in range(importedData.shape[0]):
 		keys.append(str(random.randint(1,100000)))
 	return [importedData,keys]
+
+
+
 
 def categoryWidget(_category, _activity, _data, _keys):
 	data =_data
@@ -64,7 +84,7 @@ def categoryWidget(_category, _activity, _data, _keys):
 ###################
 cola, colb = st.columns([4,1])
 with cola:
-	st.title('WBDK Prioritising Tool v.1.1')
+	st.title('WBDK Prioritising Tool v.1.2')
 with colb:
 	st.image('assets/logo.jpg')
 
@@ -190,6 +210,12 @@ flat_weighs_list = [
     for x in xs
 ]
 
+flat_responses_list = [
+    x
+    for xs in collectedResponses
+    for x in xs
+]
+
 overall_result = np.mean(weightedResult) / np.mean(flat_weighs_list)
 
 ###################
@@ -208,12 +234,8 @@ for r in responses:
 
 
 
-st.header('Overall Score: ' + str(int(overall_result*100)) + '%')
-#st.write('Total Economy: ' + str(economy) + ' DKK')
-# if cost_per_lead:
-# 	st.write('Cost Per Lead: ' + str(cost_per_lead) + ' DKK')
-# st.write('Overall Score: ' + str(int(overall_result*100)) + '%')
-#st.header('Category Scores')
+
+
 final_score = []
 for cat in categoryResponses:
 	scr = (cat[1])
@@ -229,9 +251,66 @@ df = pd.DataFrame(
         }
     )
 
-st.dataframe(df, use_container_width=True,hide_index=True)
-st.bar_chart(df, x="Category", y="Score", color=["#FF0000"])
-fig = px.line_polar(df, r='Score', theta='Category', line_close=True)
-st.plotly_chart(fig)
-#st.write(fig.show())
+
+resultContainer = st.container(border = True)
+resultContainer.header('Results - ' + ' '+ actType + ' - Overall Score: ' + str(int(overall_result*100)) + '%')
+#mitigation_pct = 80
+with resultContainer.container():
+
+	#polar/radar graph
+	fig = px.line_polar(df, r='Score', theta='Category', line_close=True)
+	fig.update_polars(bgcolor='black')
+	fig.update_traces(fill='toself')
+	st.plotly_chart(fig, theme=None,fill='toself')
+
+	resultSubContainer = st.container(border = True)
+	col3, col4, = st.columns(2, vertical_alignment="bottom")
+
+	with col3:	
+		#bar chart
+		st.bar_chart(df, x="Category", y="Score", color=["#FF0000"], horizontal=True)
+	with col4:
+		#table 
+		st.dataframe(df, use_container_width=True,hide_index=True)
+
+	#chatbot interface
+
+
+	#build interface
+	st.subheader("Chatbot Summary", divider=True)
+	chatSubContainer = st.container(border = True)
+	col5, col6, col7 = st.columns(3, vertical_alignment="bottom")
+	with col5:
+		mitigation_pct = st.number_input(label="Score % threshold to mitigate", min_value=20, max_value=90, value=50, step=5 )
+	with col6:
+		terseness=st.checkbox("Summarized Output")
+	with col7:
+		if st.button(label="Generate Chatbot Summary"):
+			if (mitigation_pct is not None):
+				chat_primer= "Evaluate the following data to decide if an organisation should invest resources in a" + actType
+				query = "The following questions -" + "".join(collectedQuestions) + " have the following answers:" + "".join(str(flat_responses_list))
+				prompt = "Provide an overview of how to mitigate a score of less than " + str(mitigation_pct) +" for each of these cataegories: " +str(df)
+				if (terseness):
+					chat_tone = " The tone should be terse and professional. The audience are innovation experts. Provide an unvarnished evaluation of the overall score (out of one): " + str(overall_result)
+				else:
+					chat_tone = " The tone should be for a general audience. Explain in detail"
+				message = chat_primer + query + prompt + chat_tone
+
+				chat_response = chat.send_message(message)
+	
+	#output respose		
+	if('chat_response' in vars()):
+		st.write(chat_response.text)
+
+	
+
+
+
+	
+
+
+	#for (i,q) in enumerate(collectedQuestions):
+	#	st.write(q + ' : ' + str(flat_responses_list[i]))
+
+	#st.write(fig.show())
 
