@@ -1,3 +1,2 @@
-tempfile
 plotly
 google.generativeai
