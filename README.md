@@ -1,19 +1,17 @@
 # PriorTool
- Prioritsation of activities through a simple evaluation framework
+ Prioritisation of activities through a simple evaluation framework presented in an online questionnaire
 
  Takes an Excel file as input and generates a web interface to recieve answers to questions.
- Computes a serirs of scores bsased on weighting the answers.
+ Computes a series of scores based on question weights.
  Produces an output matrix of scores along several dimensions, and an overall score
+
+ TODO
  Produces a set of recommendations for incerading score along one or more dimensions
-
-
 
 
 
  TODO
  Build output and store as JSON, PDF
- Allow import of excel locally
- Write guide for Excel file updating
  Investigate UX possibilities
 
 
