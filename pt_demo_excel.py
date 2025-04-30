@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -7,14 +8,24 @@ import os
 from tempfile import NamedTemporaryFile
 import plotly.express as px
 import google.generativeai as ai
-from pypdf import PdfReader
+
+##################
+###
+### WBDK Evaluation Tool. 
+### Ben Cahill (bencahill23@gmail.com)
+###
+### 
+###
+##################
+
 
 
 #############
 # CHATBOT
 #############
 
-google_api_key = 'AIzaSyBC6tI_A5paMPTTAJt9OU1V25Ussf9iCeo'
+
+google_api_key = st.secrets["GOOGLE_API_KEY"]
 # Configure the API
 ai.configure(api_key=google_api_key)
 
@@ -28,6 +39,8 @@ global message
 #############
 # IMPORT DATA
 #############
+
+# have to add ids manually if widgets are generated dynamically.
 @st.cache_data
 def readExcel(pathToFile):
 	importedData = pd.read_excel(pathToFile)
@@ -233,9 +246,6 @@ for r in responses:
 	categoryResponses.append([cat_title, resps, tmp_wght.copy()])
 
 
-
-
-
 final_score = []
 for cat in categoryResponses:
 	scr = (cat[1])
@@ -252,9 +262,9 @@ df = pd.DataFrame(
     )
 
 
+# Build Results GUI
 resultContainer = st.container(border = True)
 resultContainer.header('Results - ' + ' '+ actType + ' - Overall Score: ' + str(int(overall_result*100)) + '%')
-#mitigation_pct = 80
 with resultContainer.container():
 
 	#polar/radar graph
@@ -273,10 +283,8 @@ with resultContainer.container():
 		#table 
 		st.dataframe(df, use_container_width=True,hide_index=True)
 
-	#chatbot interface
 
-
-	#build interface
+	#build chatbot nterface
 	st.subheader("Chatbot Summary", divider=True)
 	chatSubContainer = st.container(border = True)
 	col5, col6, col7 = st.columns(3, vertical_alignment="bottom")
@@ -298,19 +306,9 @@ with resultContainer.container():
 
 				chat_response = chat.send_message(message)
 	
-	#output respose		
+	#output chatbot respose		
 	if('chat_response' in vars()):
 		st.write(chat_response.text)
 
 	
-
-
-
-	
-
-
-	#for (i,q) in enumerate(collectedQuestions):
-	#	st.write(q + ' : ' + str(flat_responses_list[i]))
-
-	#st.write(fig.show())
 
