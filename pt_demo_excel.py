@@ -270,8 +270,8 @@ with resultContainer.container():
 	#polar/radar graph
 	fig = px.line_polar(df, r='Score', theta='Category', line_close=True)
 	fig.update_polars(bgcolor='black')
-	fig.update_traces(fill='toself')
-	st.plotly_chart(fig, theme=None,fill='toself')
+	fig.update_traces()
+	st.plotly_chart(fig, theme=None)
 
 	resultSubContainer = st.container(border = True)
 	col3, col4, = st.columns(2, vertical_alignment="bottom")
