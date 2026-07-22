@@ -30,7 +30,7 @@ google_api_key = st.secrets["GOOGLE_API_KEY"]
 ai.configure(api_key=google_api_key)
 
 # Create a new model
-model = ai.GenerativeModel("gemini-1.5-pro-002")
+model = ai.GenerativeModel("gemini-3.1-flash-lite")
 chat = model.start_chat()
 global message
 
